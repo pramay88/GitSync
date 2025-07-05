@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "LeetCode Git Pusher",
+  "name": "GitSync",
   "version": "1.0.0",
   "description": "Automatically push your LeetCode solutions to GitHub with one click",
   
@@ -13,7 +13,8 @@
   "host_permissions": [
     "https://leetcode.com/*",
     "https://www.leetcode.com/*",
-    "https://api.github.com/*"
+    "https://api.github.com/*",
+    "https://code-analyzer-six.vercel.app/*"
   ],
   
   "background": {

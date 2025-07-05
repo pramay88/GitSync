@@ -1,4 +1,4 @@
-// Enhanced Content script for LeetCode Git Pusher
+// Enhanced Content script for GitSync🚀
 class LeetCodeGitPusher {
     constructor() {
         this.button = null;
@@ -11,16 +11,16 @@ class LeetCodeGitPusher {
 
     log(message, data = null) {
         if (this.debugMode) {
-            console.log(`[LeetCode Git Pusher] ${message}`, data || '');
+            console.log(`[GitSync🚀] ${message}`, data || '');
         }
     }
 
     error(message, error = null) {
-        console.error(`[LeetCode Git Pusher ERROR] ${message}`, error || '');
+        console.error(`[GitSync🚀 ERROR] ${message}`, error || '');
     }
 
     init() {
-        this.log('Initializing LeetCode Git Pusher...');
+        this.log('Initializing GitSync🚀...');
         this.log('Current URL:', window.location.href);
         this.log('Page readyState:', document.readyState);
         
@@ -216,8 +216,10 @@ class LeetCodeGitPusher {
             }
 
             // Get difficulty
-            const difficulty = this.extractDifficulty();
-            this.log('Difficulty:', difficulty);
+            const difficulty = await this.extractDifficulty();
+this.log('Difficulty:', difficulty);
+
+        
 
             // Get code from editor
             const code = this.extractCode();
@@ -238,6 +240,8 @@ class LeetCodeGitPusher {
             // Get problem URL
             const url = window.location.href;
 
+            const complexity = await this.getComplexity(code);
+
             const solutionData = {
                 problemTitle,
                 difficulty: difficulty || 'Unknown',
@@ -246,7 +250,8 @@ class LeetCodeGitPusher {
                 runtime: runtime || 'N/A',
                 memory: memory || 'N/A',
                 url,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                complexity: complexity || 'N/A'
             };
 
             this.log('Complete solution data:', solutionData);
@@ -306,7 +311,7 @@ class LeetCodeGitPusher {
 }
 
 
-    async fetchDifficultyFromAPI(problemSlug) {
+    async  fetchDifficultyFromAPI(problemSlug) {
     try {
         const res = await fetch(`https://leetcode.com/graphql`, {
             method: 'POST',
@@ -325,24 +330,27 @@ class LeetCodeGitPusher {
         });
 
         const json = await res.json();
+        console.log('➡️LeetCode API raw response for difficulty:', json);
         return json.data?.question?.difficulty || 'Unknown';
     } catch (e) {
-        this.error('Failed to fetch difficulty from API:', e);
+        console.error('Failed to fetch difficulty from API:', e);
         return 'Unknown';
     }
 }
 
 
+
     async extractDifficulty() {
-    const slugMatch = window.location.pathname.match(/problems\/([\w-]+)\//);
+    const slugMatch = window.location.pathname.match(/problems\/([\w-]+)(?=\/|$)/);
     const problemSlug = slugMatch?.[1];
     if (problemSlug) {
-        const difficulty = await this.fetchDifficultyFromAPI(problemSlug.toLowerCase());
+        const difficulty = await this.fetchDifficultyFromAPI(problemSlug);
         this.log('Fetched difficulty from API:', difficulty);
         return difficulty;
     }
     return 'Unknown';
 }
+
 
 
     extractCode() {
@@ -351,12 +359,12 @@ class LeetCodeGitPusher {
             for (const codeEl of codeBlocks) {
                 const code = codeEl.textContent;
                 if (code && code.trim().length > 20) {
-                console.log('[LeetHub] ✅ Code extracted from <pre><code>');
+                console.log('✅ Code extracted from <pre><code>');
                 return code;
                 }
             }
 
-            console.error('[LeetHub] ❌ No code found in <pre><code> blocks.');
+            console.error('❌ No code found in <pre><code> blocks.');
             return null;
 
         } catch (error) {
@@ -482,39 +490,75 @@ class LeetCodeGitPusher {
     return { runtime, memory };
 }
     
-    async  analyzeComplexityWithAI() {
-        const code = extractCode();
-        const apiKey = 'YOUR_OPENAI_API_KEY'; // Secure this in your backend ideally
+    async getComplexity(code) {
+    // 👇 Only extract if not passed
+    if (!code) {
+        code = await this.extractCode();
+    }
 
-        const prompt = `
-        Analyze the following code and return just this format:
+    if (!code) {
+        console.error('❌No code found to analyze complexity');
+        return null;
+    }
 
-        Time Complexity: O(...)
-        Space Complexity: O(...)
+    console.log('Code sent to API:', code.slice(0, 100)); // log first 100 chars
 
-        Code:
-        \`\`\`
-        ${code}
-        \`\`\`
-        `;
+    try {
+        // ✅ Ensure code is a string and not empty
+        const codeString = String(code).trim();
+        if (!codeString) {
+            console.error('❌Code is empty after trimming');
+            return null;
+        }
 
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-            model: "gpt-4",  // or "gpt-3.5-turbo" for cheaper calls
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.3
-            })
+        const requestBody = {
+            code: codeString
+        };
+
+        console.log('📤 Sending request body:', {
+            code: codeString.slice(0, 100) + '...',
+            codeLength: codeString.length,
+            codeType: typeof codeString
         });
 
-        const data = await response.json();
-        const output = data.choices[0].message.content.trim();
-        return output;
+        const res = await fetch('https://code-analyzer-six.vercel.app/api/analyze', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        console.log('📥 Response status:', res.status);
+        console.log('📥 Response headers:', [...res.headers.entries()]);
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('❌ Server error response:', errorText);
+            throw new Error(`Server error: ${res.status} - ${errorText}`);
         }
+
+        const complexityData = await res.json();
+        console.log('📊 Full response data:', complexityData);
+
+        if (complexityData?.result) {
+            console.log('➡️Complexity:', complexityData.result);
+            return complexityData.result;
+        } else {
+            console.error('❌No result in complexityData', complexityData);
+            return null;
+        }
+
+    } catch (error) {
+        console.error('[GitSync🚀 ERROR] Error fetching complexity:', error);
+        return null;
+    }
+}
+
+
+
+
 
 
 
