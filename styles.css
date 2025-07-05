@@ -267,3 +267,74 @@
 .leetcode-git-pusher-btn:not(:disabled):hover {
     background-color: #444;
 }
+
+/* Container */
+.gitsync-container {
+    position: fixed;
+    top: 50px;
+    right: 50px;
+    z-index: 10000;
+    font-family: system-ui, sans-serif;
+}
+
+/* Button */
+.gitsync-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #24292e 0%, #1a1e22 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+    min-width: 160px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover State */
+.gitsync-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #2f363d 0%, #24292e 100%);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Disabled */
+.gitsync-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Shimmer / Border Effect */
+.animated-border::before {
+    content: "";
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(90deg, #ff6ec4, #7873f5, #4ADEDE, #ff6ec4);
+    background-size: 400%;
+    z-index: -1;
+    border-radius: 10px;
+    animation: border-run 3s linear infinite;
+}
+
+@keyframes border-run {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
