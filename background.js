@@ -235,9 +235,15 @@ ${code}
             markdownContent += `
 ## Complexity Analysis
 
-${complexity ||"- **Time Complexity:** O(?) - **Space Complexity:** O(?)"}
+${complexity?.result || "- **Time Complexity:** O(?)\n- **Space Complexity:** O(?)"}
 
-> *Please analyze and update the complexity values above*
+${complexity?.result ? (
+  complexity?.source === 'fallback'
+    ? '> ⚠️ _This complexity was estimated locally. Review advised._'
+    : complexity?.source
+      ? `>  _Complexity estimated using AI (${complexity.source})._`
+      : '>  _Complexity analysis source not available._'
+) : ''}
 `;
         }
 

@@ -205,26 +205,26 @@ class LeetCodeGitPusher {
 
     async extractSolutionData() {
         this.log('Extracting solution data...');
-        
+
         try {
             // Get problem title
             const problemTitle = this.extractProblemTitle();
             this.log('Problem title:', problemTitle);
-            
+
             if (!problemTitle) {
                 throw new Error('Could not extract problem title');
             }
 
             // Get difficulty
             const difficulty = await this.extractDifficulty();
-this.log('Difficulty:', difficulty);
+            this.log('Difficulty:', difficulty);
 
-        
+
 
             // Get code from editor
             const code = this.extractCode();
             this.log('Code length:', code ? code.length : 'null');
-            
+
             if (!code) {
                 throw new Error('Could not extract solution code');
             }
@@ -241,7 +241,7 @@ this.log('Difficulty:', difficulty);
             const url = window.location.href;
 
             // const complexity = await this.getComplexity(code);
-            const complexity = "N/A"; // Placeholder, uncomment if you implement complexity analysis
+            const complexity = await this.getComplexity(code); // Placeholder, uncomment if you implement complexity analysis
 
             const solutionData = {
                 problemTitle,
@@ -251,7 +251,7 @@ this.log('Difficulty:', difficulty);
                 runtime: runtime || 'N/A',
                 memory: memory || 'N/A',
                 url,
-                complexity: complexity || 'N/A'
+                complexity: complexity
             };
 
             this.log('Complete solution data:', solutionData);
@@ -337,8 +337,6 @@ this.log('Difficulty:', difficulty);
         return 'Unknown';
     }
 }
-
-
 
     async extractDifficulty() {
     const slugMatch = window.location.pathname.match(/problems\/([\w-]+)(?=\/|$)/);
@@ -523,39 +521,29 @@ extractCode() {
 }
     
     async getComplexity(code) {
-    // 👇 Only extract if not passed
     if (!code) {
         code = await this.extractCode();
     }
 
     if (!code) {
-        console.error('❌No code found to analyze complexity');
-        return null;
+        console.error('❌ No code found to analyze complexity');
+        return { result: null, source: null, data: null };
     }
 
-    console.log('Code sent to API:', code.slice(0, 100)); // log first 100 chars
+    console.log('Code sent to API:', code.slice(0, 100));
 
     try {
-        // ✅ Ensure code is a string and not empty
         const codeString = String(code).trim();
         if (!codeString) {
-            console.error('❌Code is empty after trimming');
-            return null;
+            console.error('❌ Code is empty after trimming');
+            return { result: null, source: null, data: null };
         }
 
-        const requestBody = {
-            code: codeString
-        };
-
-        console.log('📤 Sending request body:', {
-            code: codeString.slice(0, 100) + '...',
-            codeLength: codeString.length,
-            codeType: typeof codeString
-        });
+        const requestBody = { code: codeString };
 
         const res = await fetch('https://code-analyzer-six.vercel.app/api/analyze', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
@@ -574,19 +562,17 @@ extractCode() {
         const complexityData = await res.json();
         console.log('📊 Full response data:', complexityData);
 
-        if (complexityData?.result) {
-            console.log('➡️Complexity:', complexityData.result);
-            return complexityData.result;
-        } else {
-            console.error('❌No result in complexityData', complexityData);
-            return null;
-        }
+        const result = complexityData?.result || null;
+        const source = complexityData?.source || null;
+
+        return { result, source, data: complexityData };
 
     } catch (error) {
         console.error('[GitSync🚀 ERROR] Error fetching complexity:', error);
-        return null;
+        return { result: null, source: null, data: null };
     }
 }
+
 
 
 
