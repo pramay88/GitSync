@@ -222,7 +222,7 @@ class BackgroundService {
 
 ## Performance
 - **Runtime:** ${runtime}
-- **Memory Usage:** ${memory}
+- **Memory:** ${memory}
 
 ## Solution
 \`\`\`${langExt}
