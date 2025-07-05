@@ -353,85 +353,111 @@ this.log('Difficulty:', difficulty);
 
 
 
-    extractCode() {
-        // Try Monaco
-    try {
-        if (typeof monaco !== 'undefined' && monaco.editor) {
-    const editors = monaco.editor.getModels();
-    if (editors.length > 0) {
-        const code = editors[0].getValue();
-        if (code?.trim()) {
-            return code;
-        }
-    }
-}
+//     extractCode() {
+//         // Try Monaco
+//     try {
+//         if (typeof monaco !== 'undefined' && monaco.editor) {
+//     const editors = monaco.editor.getModels();
+//     if (editors.length > 0) {
+//         const code = editors[0].getValue();
+//         if (code?.trim()) {
+//             return code;
+//         }
+//     }
+// }
 
-    } catch (err) {
-        this.log('Monaco error:', err);
-    }
-    try {
-        const codeBlocks = document.querySelectorAll('pre code[class^="language-"]');
-        for (const codeEl of codeBlocks) {
-            const code = codeEl.textContent;
-            if (code && code.trim().length > 20) {
-                this.log('✅ Code extracted from <pre><code>');
-                return code;
-            }
-        }
+//     } catch (err) {
+//         this.log('Monaco error:', err);
+//     }
+//     try {
+//         const codeBlocks = document.querySelectorAll('pre code[class^="language-"]');
+//         for (const codeEl of codeBlocks) {
+//             const code = codeEl.textContent;
+//             if (code && code.trim().length > 20) {
+//                 this.log('✅ Code extracted from <pre><code>');
+//                 return code;
+//             }
+//         }
 
-        this.log('❌ No code found in <pre><code> blocks.');
-    } catch (error) {
-        this.log('HTML code extraction error:', error);
-    }
+//         this.log('❌ No code found in <pre><code> blocks.');
+//     } catch (error) {
+//         this.log('HTML code extraction error:', error);
+//     }
 
-    // Try CodeMirror
-    this.log('Trying CodeMirror...');
-    try {
-        const editor = document.querySelector('.CodeMirror')?.CodeMirror;
-        if (editor) {
-            const code = editor.getValue();
-            if (code?.trim()) {
-                this.log('✅ CodeMirror: code extracted.');
-                return code;
-            }
-        }
-    } catch (err) {
-        this.log('CodeMirror error:', err);
-    }
+//     // Try CodeMirror
+//     this.log('Trying CodeMirror...');
+//     try {
+//         const editor = document.querySelector('.CodeMirror')?.CodeMirror;
+//         if (editor) {
+//             const code = editor.getValue();
+//             if (code?.trim()) {
+//                 this.log('✅ CodeMirror: code extracted.');
+//                 return code;
+//             }
+//         }
+//     } catch (err) {
+//         this.log('CodeMirror error:', err);
+//     }
 
-    // Try <textarea>
-    this.log('Trying textarea...');
-    for (const textarea of document.querySelectorAll('textarea')) {
-        if (textarea.value?.trim().length > 10) {
-            this.log('✅ Textarea: code extracted.');
-            return textarea.value;
-        }
-    }
+//     // Try <textarea>
+//     this.log('Trying textarea...');
+//     for (const textarea of document.querySelectorAll('textarea')) {
+//         if (textarea.value?.trim().length > 10) {
+//             this.log('✅ Textarea: code extracted.');
+//             return textarea.value;
+//         }
+//     }
 
-    // Try fallback pre/code
-    this.log('Trying pre/code...');
-    for (const el of document.querySelectorAll('pre code, .code-content, [class*="code"]')) {
-        const code = el.textContent;
-        if (code?.trim().length > 10) {
-            this.log('✅ pre/code: code extracted.');
-            return code;
-        }
-    }
+//     // Try fallback pre/code
+//     this.log('Trying pre/code...');
+//     for (const el of document.querySelectorAll('pre code, .code-content, [class*="code"]')) {
+//         const code = el.textContent;
+//         if (code?.trim().length > 10) {
+//             this.log('✅ pre/code: code extracted.');
+//             return code;
+//         }
+//     }
 
-    // Heuristic fallback
-    this.log('Trying heuristic...');
-    for (const el of document.querySelectorAll('*')) {
-        const text = el.textContent;
-        if (text?.includes('{') && text.includes('}') && text.length > 20) {
-            if (/function|class|def |public |private |return/.test(text)) {
-                this.log('✅ Heuristic: code extracted.');
-                return text;
-            }
-        }
-    }
+//     // Heuristic fallback
+//     this.log('Trying heuristic...');
+//     for (const el of document.querySelectorAll('*')) {
+//         const text = el.textContent;
+//         if (text?.includes('{') && text.includes('}') && text.length > 20) {
+//             if (/function|class|def |public |private |return/.test(text)) {
+//                 this.log('✅ Heuristic: code extracted.');
+//                 return text;
+//             }
+//         }
+//     }
 
-    this.log('❌ No code found in any method.');
+//     this.log('❌ No code found in any method.');
+//     return null;
+// }
+
+ isValidSubmissionPage() {
+    return /^https:\/\/leetcode\.com\/problems\/[^/]+\/submissions\/\d+\/?$/.test(window.location.href);
+  }
+
+extractCode() {
+  if (!this.isValidSubmissionPage()) {
+    console.warn('❌ Not a valid submission page. Code extraction skipped.');
     return null;
+  }
+
+  const codeElement = document.querySelector('.px-4.py-3 pre code');
+  if (!codeElement) {
+    console.warn('⚠️ Code block not found.');
+    return null;
+  }
+
+  // Instead of extracting all spans (which may include visual tokens / duplicates),
+  // just take the textContent of the code block itself.
+  let code = codeElement.textContent || '';
+
+  // Normalize line endings and trim extra spaces
+  code = code.replace(/\r\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
+
+  return code;
 }
 
 
