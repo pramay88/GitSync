@@ -1,26 +1,26 @@
-// Enhanced Content script for LeetCode Git Pusher
+// Enhanced Content script for GitSync🚀
 class LeetCodeGitPusher {
     constructor() {
         this.button = null;
         this.solutionData = null;
         this.isProcessing = false;
         this.observers = [];
-        this.debugMode = true;
+        this.debugMode = false;
         this.init();
     }
 
     log(message, data = null) {
         if (this.debugMode) {
-            console.log(`[LeetCode Git Pusher] ${message}`, data || '');
+            console.log(`[GitSync🚀] ${message}`, data || '');
         }
     }
 
     error(message, error = null) {
-        console.error(`[LeetCode Git Pusher ERROR] ${message}`, error || '');
+        console.error(`[GitSync🚀 ERROR] ${message}`, error || '');
     }
 
     init() {
-        this.log('Initializing LeetCode Git Pusher...');
+        this.log('Initializing GitSync🚀...');
         this.log('Current URL:', window.location.href);
         this.log('Page readyState:', document.readyState);
         
@@ -216,8 +216,10 @@ class LeetCodeGitPusher {
             }
 
             // Get difficulty
-            const difficulty = this.extractDifficulty();
-            this.log('Difficulty:', difficulty);
+            const difficulty = await this.extractDifficulty();
+this.log('Difficulty:', difficulty);
+
+        
 
             // Get code from editor
             const code = this.extractCode();
@@ -238,6 +240,9 @@ class LeetCodeGitPusher {
             // Get problem URL
             const url = window.location.href;
 
+            // const complexity = await this.getComplexity(code);
+            const complexity = "N/A"; // Placeholder, uncomment if you implement complexity analysis
+
             const solutionData = {
                 problemTitle,
                 difficulty: difficulty || 'Unknown',
@@ -246,7 +251,7 @@ class LeetCodeGitPusher {
                 runtime: runtime || 'N/A',
                 memory: memory || 'N/A',
                 url,
-                timestamp: new Date().toISOString()
+                complexity: complexity || 'N/A'
             };
 
             this.log('Complete solution data:', solutionData);
@@ -306,7 +311,7 @@ class LeetCodeGitPusher {
 }
 
 
-    async fetchDifficultyFromAPI(problemSlug) {
+    async  fetchDifficultyFromAPI(problemSlug) {
     try {
         const res = await fetch(`https://leetcode.com/graphql`, {
             method: 'POST',
@@ -325,19 +330,21 @@ class LeetCodeGitPusher {
         });
 
         const json = await res.json();
+        console.log('➡️LeetCode API raw response for difficulty:', json);
         return json.data?.question?.difficulty || 'Unknown';
     } catch (e) {
-        this.error('Failed to fetch difficulty from API:', e);
+        console.error('Failed to fetch difficulty from API:', e);
         return 'Unknown';
     }
 }
 
 
+
     async extractDifficulty() {
-    const slugMatch = window.location.pathname.match(/problems\/([\w-]+)\//);
+    const slugMatch = window.location.pathname.match(/problems\/([\w-]+)(?=\/|$)/);
     const problemSlug = slugMatch?.[1];
     if (problemSlug) {
-        const difficulty = await this.fetchDifficultyFromAPI(problemSlug.toLowerCase());
+        const difficulty = await this.fetchDifficultyFromAPI(problemSlug);
         this.log('Fetched difficulty from API:', difficulty);
         return difficulty;
     }
@@ -345,38 +352,39 @@ class LeetCodeGitPusher {
 }
 
 
+
     extractCode() {
-        try {
-            const codeBlocks = document.querySelectorAll('pre code[class^="language-"]');
-            for (const codeEl of codeBlocks) {
-                const code = codeEl.textContent;
-                if (code && code.trim().length > 20) {
-                console.log('[LeetHub] ✅ Code extracted from <pre><code>');
-                return code;
-                }
-            }
-
-            console.error('[LeetHub] ❌ No code found in <pre><code> blocks.');
-            return null;
-
-        } catch (error) {
-            this.log('HTML code extraction error: ', error)
-        }
-    
+        // Try Monaco
     try {
         if (typeof monaco !== 'undefined' && monaco.editor) {
-            this.log('Trying Monaco...');
-            const editors = monaco.editor.getModels();
-            if (editors.length > 0) {
-                const code = editors[0].getValue();
-                if (code?.trim()) {
-                    this.log('✅ Monaco: code extracted.');
-                    return code;
-                }
+    const editors = monaco.editor.getModels();
+    if (editors.length > 0) {
+        const code = editors[0].getValue();
+        if (code?.trim()) {
+            return code;
+        }
+    }
+}
+
+    } catch (err) {
+        this.log('Monaco error:', err);
+    }
+    try {
+        const codeBlocks = document.querySelectorAll('pre code[class^="language-"]');
+        for (const codeEl of codeBlocks) {
+            const code = codeEl.textContent;
+            if (code && code.trim().length > 20) {
+                this.log('✅ Code extracted from <pre><code>');
+                return code;
             }
         }
-    } catch (err) { this.log('Monaco error: ' + err); }
 
+        this.log('❌ No code found in <pre><code> blocks.');
+    } catch (error) {
+        this.log('HTML code extraction error:', error);
+    }
+
+    // Try CodeMirror
     this.log('Trying CodeMirror...');
     try {
         const editor = document.querySelector('.CodeMirror')?.CodeMirror;
@@ -387,8 +395,11 @@ class LeetCodeGitPusher {
                 return code;
             }
         }
-    } catch (err) { this.log('CodeMirror error: ' + err); }
+    } catch (err) {
+        this.log('CodeMirror error:', err);
+    }
 
+    // Try <textarea>
     this.log('Trying textarea...');
     for (const textarea of document.querySelectorAll('textarea')) {
         if (textarea.value?.trim().length > 10) {
@@ -397,6 +408,7 @@ class LeetCodeGitPusher {
         }
     }
 
+    // Try fallback pre/code
     this.log('Trying pre/code...');
     for (const el of document.querySelectorAll('pre code, .code-content, [class*="code"]')) {
         const code = el.textContent;
@@ -406,6 +418,7 @@ class LeetCodeGitPusher {
         }
     }
 
+    // Heuristic fallback
     this.log('Trying heuristic...');
     for (const el of document.querySelectorAll('*')) {
         const text = el.textContent;
@@ -417,9 +430,10 @@ class LeetCodeGitPusher {
         }
     }
 
-    this.log('❌ No code found.');
+    this.log('❌ No code found in any method.');
     return null;
 }
+
 
 
     extractLanguage() {
@@ -482,123 +496,191 @@ class LeetCodeGitPusher {
     return { runtime, memory };
 }
     
-    async  analyzeComplexityWithAI() {
-        const code = extractCode();
-        const apiKey = 'YOUR_OPENAI_API_KEY'; // Secure this in your backend ideally
+    async getComplexity(code) {
+    // 👇 Only extract if not passed
+    if (!code) {
+        code = await this.extractCode();
+    }
 
-        const prompt = `
-        Analyze the following code and return just this format:
+    if (!code) {
+        console.error('❌No code found to analyze complexity');
+        return null;
+    }
 
-        Time Complexity: O(...)
-        Space Complexity: O(...)
+    console.log('Code sent to API:', code.slice(0, 100)); // log first 100 chars
 
-        Code:
-        \`\`\`
-        ${code}
-        \`\`\`
-        `;
+    try {
+        // ✅ Ensure code is a string and not empty
+        const codeString = String(code).trim();
+        if (!codeString) {
+            console.error('❌Code is empty after trimming');
+            return null;
+        }
 
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-            method: "POST",
-            headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-            model: "gpt-4",  // or "gpt-3.5-turbo" for cheaper calls
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.3
-            })
+        const requestBody = {
+            code: codeString
+        };
+
+        console.log('📤 Sending request body:', {
+            code: codeString.slice(0, 100) + '...',
+            codeLength: codeString.length,
+            codeType: typeof codeString
         });
 
-        const data = await response.json();
-        const output = data.choices[0].message.content.trim();
-        return output;
+        const res = await fetch('https://code-analyzer-six.vercel.app/api/analyze', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        console.log('📥 Response status:', res.status);
+        console.log('📥 Response headers:', [...res.headers.entries()]);
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error('❌ Server error response:', errorText);
+            throw new Error(`Server error: ${res.status} - ${errorText}`);
         }
+
+        const complexityData = await res.json();
+        console.log('📊 Full response data:', complexityData);
+
+        if (complexityData?.result) {
+            console.log('➡️Complexity:', complexityData.result);
+            return complexityData.result;
+        } else {
+            console.error('❌No result in complexityData', complexityData);
+            return null;
+        }
+
+    } catch (error) {
+        console.error('[GitSync🚀 ERROR] Error fetching complexity:', error);
+        return null;
+    }
+}
+
+
+
+
 
 
 
     createPushButton() {
-        this.log('Creating push button...');
-        
-        // Remove existing button
-        const existingBtn = document.getElementById('leetcode-git-pusher-btn');
-        if (existingBtn) {
-            existingBtn.remove();
-        }
+    this.log('Creating push button...');
 
-        // Create button
-        this.button = document.createElement('button');
-        this.button.id = 'leetcode-git-pusher-btn';
-        this.button.className = 'leetcode-git-pusher-btn';
-        this.button.innerHTML = `
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-            </svg>
-            Push to GitHub
-        `;
-
-        this.button.title = 'Push your solution to GitHub repository';
-        this.button.addEventListener('click', () => this.handleButtonClick());
-
-        // Create container
-        const container = document.createElement('div');
-        container.className = 'leetcode-git-pusher-container';
-        container.appendChild(this.button);
-        
-        // Insert button
-        this.insertButton(container);
+    // Remove existing button if present
+    const existingBtn = document.getElementById('leetcode-git-pusher-btn');
+    if (existingBtn) {
+        existingBtn.remove();
     }
+
+    // Check if it's a submission page
+    const isSubmissionPage = /\/problems\/[^/]+\/submissions\/\d+\/?$/.test(window.location.pathname);
+
+    // Create button
+    this.button = document.createElement('button');
+    this.button.id = 'leetcode-git-pusher-btn';
+    this.button.className = 'leetcode-git-pusher-btn';
+    this.button.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+        </svg>
+        Push to GitHub
+    `;
+
+    this.button.title = 'Push your solution to GitHub repository';
+
+    // Set functional behavior based on page
+    if (isSubmissionPage) {
+        this.button.disabled = false;
+        this.button.style.opacity = '1';
+        this.button.style.cursor = 'pointer';
+        this.button.addEventListener('click', () => this.handleButtonClick());
+    } else {
+        this.button.disabled = true;
+        this.button.style.opacity = '0.5';
+        this.button.style.cursor = 'not-allowed';
+        this.button.title = 'Please submit your solution before pushing to GitHub.';
+
+    }
+
+    // Create container
+    const container = document.createElement('div');
+    container.className = 'leetcode-git-pusher-container';
+    container.appendChild(this.button);
+
+    // Insert into DOM
+    this.insertButton(container);
+}
+
 
     insertButton(container) {
-        // Strategy 1: Near submission result
-        const resultSelectors = [
-            '[data-e2e-locator="submission-result"]',
-            '.submission-result',
-            '.result-container'
-        ];
-
-        for (const selector of resultSelectors) {
-            const element = document.querySelector(selector);
-            if (element) {
-                element.parentNode.insertBefore(container, element.nextSibling);
-                this.log('Button inserted near submission result');
-                return;
-            }
-        }
-
-        // Strategy 2: Near performance metrics
-        const performanceElements = document.querySelectorAll('*');
-        for (const element of performanceElements) {
-            const text = element.textContent.toLowerCase();
-            if (text.includes('runtime') && text.includes('memory') && text.includes('ms')) {
-                element.parentNode.insertBefore(container, element.nextSibling);
-                this.log('Button inserted near performance metrics');
-                return;
-            }
-        }
-
-        // Strategy 3: Top of page
-        const topBarSelectors = [
-            '.flex.justify-between.items-center',
-            '.submission-header',
-            '.problem-header'
-        ];
-
-        for (const selector of topBarSelectors) {
-            const element = document.querySelector(selector);
-            if (element) {
-                element.appendChild(container);
-                container.classList.add('in-result-area');
-                this.log('Button inserted in top bar');
-                return;
-            }
-        }
-
-        // Strategy 4: Fallback - append to body
-        document.body.appendChild(container);
-        this.log('Button inserted at bottom of page (fallback)');
+    // Prevent duplicate insertion
+    if (document.getElementById('leetcode-git-pusher-btn')) {
+        this.log('⚠️ Button already inserted. Skipping.');
+        return;
     }
+
+    container.id = 'leetcode-git-pusher-btn';
+
+    // Strategy 1: Near submission result
+    const resultSelectors = [
+        '[data-e2e-locator="submission-result"]',
+        '.submission-result',
+        '.result-container'
+    ];
+
+    for (const selector of resultSelectors) {
+        const element = document.querySelector(selector);
+        if (element && element.parentNode instanceof HTMLElement) {
+            element.parentNode.insertBefore(container, element.nextSibling);
+            this.log('✅ Button inserted near submission result');
+            return;
+        }
+    }
+
+    // Strategy 2: Near performance metrics
+    const performanceElements = document.querySelectorAll('*');
+    for (const element of performanceElements) {
+        const text = element.textContent?.toLowerCase() || '';
+        if (text.includes('runtime') && text.includes('memory') && text.includes('ms')) {
+            if (element.parentNode instanceof HTMLElement) {
+                element.parentNode.insertBefore(container, element.nextSibling);
+                this.log('✅ Button inserted near performance metrics');
+                return;
+            }
+        }
+    }
+
+    // Strategy 3: Top of the page
+    const topBarSelectors = [
+        '.flex.justify-between.items-center',
+        '.submission-header',
+        '.problem-header'
+    ];
+
+    for (const selector of topBarSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.appendChild(container);
+            container.classList.add('in-result-area');
+            this.log('✅ Button inserted in top bar');
+            return;
+        }
+    }
+
+    // Strategy 4: Fallback - append to body
+    if (document.body) {
+        document.body.appendChild(container);
+        this.log('✅ Button inserted at bottom of page (fallback)');
+    } else {
+        this.error('❌ Failed to insert button: No valid parent node found.');
+    }
+}
+
 
     async handleButtonClick() {
         if (this.isProcessing) {
@@ -733,4 +815,3 @@ cleanup() {
 if (window.location.hostname.includes('leetcode.com')) {
     window.leetGitPusher = new LeetCodeGitPusher();
 }
-    
