@@ -115,3 +115,21 @@ chrome.storage.local.get(["syncedSolutions"], (result) => {
   mediumCountEl.textContent = counts.medium;
   hardCountEl.textContent = counts.hard;
 });
+
+document.querySelectorAll(".tab-button").forEach(button => {
+  button.addEventListener("click", () => {
+    const tab = button.getAttribute("data-tab");
+
+    // Toggle active tab button
+    document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+    button.classList.add("active");
+
+    // Toggle content
+    document.querySelectorAll(".tab-content").forEach(content => {
+      content.classList.remove("active");
+      if (content.getAttribute("data-tab") === tab) {
+        content.classList.add("active");
+      }
+    });
+  });
+});

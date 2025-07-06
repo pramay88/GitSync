@@ -1,277 +1,217 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="utf-8" />
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-        body {
-            width: 380px;
-            min-height: 500px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f8f9fa;
-            color: #24292e;
-        }
+body {
+  width: 380px;
+  height: 600px; /* Fix height */
+  overflow: hidden; /* Hide scroll bar */
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: #f8f9fa;
+  color: #24292e;
+}
 
-        .header {
-            background: linear-gradient(135deg, #24292e 0%, #1a1e22 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
 
-        .header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
 
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
 
-        .content {
-            padding: 20px;
-        }
+.header {
+  background: linear-gradient(135deg, #24292e 0%, #1a1e22 100%);
+  color: white;
+  padding: 12px 10px;
+  text-align: center;
+}
 
-        .auth-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.header h1 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
 
-        .auth-section h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
-            color: #24292e;
-        }
+.header p {
+  font-size: 12px;
+  opacity: 0.85;
+}
 
-        .form-group {
-            margin-bottom: 16px;
-        }
+.content {
+  padding: 12px;
+  flex-grow: 1;
+  overflow-y: auto; /* Internal scrolling for long tabs */
+}
 
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 6px;
-            color: #586069;
-        }
+.tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
 
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #d1d5da;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.2s ease;
-        }
+.tab-button {
+  padding: 6px 10px;
+  font-size: 13px;
+  background: #e1e4e8;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  flex: 1;
+  margin: 0 2px;
+  transition: background-color 0.2s ease;
+}
 
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #0366d6;
-            box-shadow: 0 0 0 3px rgba(3, 102, 214, 0.1);
-        }
+.tab-button.active {
+  background: #0366d6;
+  color: white;
+}
 
-        .btn {
-            background: #0366d6;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            width: 100%;
-        }
+.tab-content {
+  display: none;
+}
 
-        .btn:hover {
-            background: #0256cc;
-        }
+.tab-content.active {
+  display: block;
+}
 
-        .btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
+.auth-section,
+.config-section,
+.stats-section {
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
 
-        .btn.btn-success {
-            background: #28a745;
-        }
+.auth-section h3,
+.config-section h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
 
-        .btn.btn-success:hover {
-            background: #20993e;
-        }
+.form-group {
+  margin-bottom: 10px;
+}
 
-        .btn.btn-danger {
-            background: #dc3545;
-        }
+.form-group label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: block;
+  color: #586069;
+}
 
-        .btn.btn-danger:hover {
-            background: #c82333;
-        }
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid #d1d5da;
+  border-radius: 5px;
+}
 
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
+.btn {
+  background: #0366d6;
+  color: white;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: none;
+  border-radius: 5px;
+  width: 100%;
+  cursor: pointer;
+  font-weight: 500;
+}
 
-        .status-indicator.connected {
-            color: #28a745;
-        }
+.btn:hover {
+  background: #0256cc;
+}
 
-        .status-indicator.disconnected {
-            color: #dc3545;
-        }
+.btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: currentColor;
-        }
+.btn.btn-success {
+  background: #28a745;
+}
 
-        .help-text {
-            font-size: 12px;
-            color: #6a737d;
-            margin-top: 6px;
-            line-height: 1.4;
-        }
+.btn.btn-success:hover {
+  background: #20993e;
+}
 
-        .help-text a {
-            color: #0366d6;
-            text-decoration: none;
-        }
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
 
-        .help-text a:hover {
-            text-decoration: underline;
-        }
+.status-indicator.connected {
+  color: #28a745;
+}
 
-        .config-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.status-indicator.disconnected {
+  color: #dc3545;
+}
 
-        .stats-section {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 12px;
-        }
+.help-text {
+  font-size: 11px;
+  margin-top: 6px;
+  color: #6a737d;
+}
 
-        .stat-item {
-            text-align: center;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
+.help-text a {
+  color: #0366d6;
+  text-decoration: none;
+}
 
-        .stat-number {
-            font-size: 24px;
-            font-weight: bold;
-            color: #24292e;
-        }
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
 
-        .stat-label {
-            font-size: 12px;
-            color: #6a737d;
-            margin-top: 4px;
-        }
+.footer {
+  text-align: center;
+  padding: 12px 10px;
+  font-size: 11px;
+  color: #6a737d;
+    flex-shrink: 0;
 
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 50%;
-            border-top-color: #0366d6;
-            animation: spin 1s ease-in-out infinite;
-        }
+}
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .message {
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: auto;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 16px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            font-size: 12px;
-            color: #6a737d;
-        }
-
-        /* Stats */
+/* Stats Section */
 .leetcode-stats {
   display: flex;
   gap: 10px;
   justify-content: space-between;
   flex-wrap: wrap;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 8px;
   border-radius: 8px;
   background: #f8f9fa;
-  max-width: 300px;
 }
 
 .stat-box {
-  border-radius: 16px;
-  padding: 4px 12px;
-  font-size: 14px;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 13px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -279,138 +219,141 @@
   font-weight: 500;
   background: #fdfdfd;
   border: 1px solid #eee;
-  transition: all 0.2s ease-in-out;
 }
-.stat-box:hover {
-  box-shadow: 0 0 6px rgba(0,0,0,0.05);
-}
-
 
 .stat-number {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: bold;
 }
 
 .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #555;
 }
 
-/* Difficulty-based coloring */
 .easy .stat-number {
-  color: #2ecc71; /* Green */
+  color: #2ecc71;
 }
 
 .medium .stat-number {
-  color: #e67e22; /* Orange */
+  color: #e67e22;
 }
 
 .hard .stat-number {
-  color: #e74c3c; /* Red */
+  color: #e74c3c;
 }
 
 .total .stat-number {
-  color: #34495e; /* Dark blue-gray */
-}
-.stat-box:hover::after {
-  content: "X solutions tagged";
-  position: absolute;
-  background: #333;
-  color: #fff;
-  font-size: 11px;
-  padding: 3px 6px;
-  border-radius: 3px;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  color: #34495e;
 }
 
-
-    </style>
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>
-  <img src="icons/icon128.png" width="20" height="20" alt="GitSync logo" style="border-radius: 4px;" />
-  GitSync
-</h1>
+  <div class="header">
+    <h1>
+      <img src="icons/icon128.png" width="20" height="20" alt="GitSync logo" style="border-radius: 4px;" />
+      GitSync
+    </h1>
+    <p>Automatically sync your solutions to GitHub</p>
+  </div>
 
-        <p>Automatically sync your solutions to GitHub</p>
+  <div class="content">
+    <div class="tabs">
+      <button class="tab-button active" data-tab="sync">🔧 Sync Settings</button>
+      <button class="tab-button" data-tab="stats">📊 Stats</button>
     </div>
 
-    <div class="content">
-        <!-- Messages -->
-        <div id="message-container"></div>
+    <!-- Tab Content: Sync -->
+    <div class="tab-content active" data-tab="sync">
+      <div class="auth-section">
+        <h3>GitHub Authentication</h3>
+        <div id="auth-status" class="status-indicator disconnected">
+          <div class="status-dot"></div>
+          <span>Not connected</span>
+        </div>
 
-        <!-- Authentication Section -->
-        <div class="auth-section">
-            <h3>GitHub Authentication</h3>
-            <div id="auth-status" class="status-indicator disconnected">
-                <div class="status-dot"></div>
-                <span>Not connected</span>
-            </div>
+        <div id="auth-form">
+          <div class="form-group">
+            <label for="github-token">GitHub Personal Access Token</label>
+            <input type="password" id="github-token" placeholder="ghp_YourTokenHere" />
+          </div>
+          <button class="btn" id="connect-btn">Connect to GitHub</button>
+          <div class="help-text">
+            Need help generating a token?
+            <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">Click here</a>
+          </div>
+        </div>
+      </div>
 
-            <div id="auth-form">
-                <div class="form-group">
-                    <label for="github-token">GitHub Personal Access Token</label>
-                    <input type="password" id="github-token" placeholder="ghp_YourTokenHere">
-</div>
-
-<button class="btn" id="connect-btn">Connect to GitHub</button>
-
-<div class="help-text">
-    Need help generating a token? 
-    <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer">Click here</a>
-</div>
-</div>
-</div>
-
-<!-- Config Section -->
-<div class="config-section">
-    <h3>Sync Settings</h3>
-    <div class="form-group">
-        <label for="repo-name">Repository Name</label>
-        <input type="text" id="repo-name" placeholder="e.g. leetcode-solutions">
+      <div class="config-section">
+        <h3>Sync Settings</h3>
+        <div class="form-group">
+          <label for="repo-name">Repository Name</label>
+          <input type="text" id="repo-name" placeholder="e.g. leetcode-solutions" />
+        </div>
+        <div class="form-group">
+          <label for="commit-message">Default Commit Message</label>
+          <input type="text" id="commit-message" placeholder="e.g. Add new solution" />
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="auto-sync" />
+          <label for="auto-sync">Enable auto sync on problem submission</label>
+        </div>
+        <button class="btn btn-success" id="save-settings-btn">Save Settings</button>
+      </div>
     </div>
-    <div class="form-group">
-        <label for="commit-message">Default Commit Message</label>
-        <input type="text" id="commit-message" placeholder="e.g. Add new solution">
+
+    <!-- Tab Content: Stats -->
+    <div class="tab-content" data-tab="stats">
+      <div class="leetcode-stats">
+        <div class="stat-box total">
+          <div class="stat-number" id="total-synced">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat-box easy">
+          <div class="stat-number" id="easy-count">0</div>
+          <div class="stat-label">Easy</div>
+        </div>
+        <div class="stat-box medium">
+          <div class="stat-number" id="medium-count">0</div>
+          <div class="stat-label">Medium</div>
+        </div>
+        <div class="stat-box hard">
+          <div class="stat-number" id="hard-count">0</div>
+          <div class="stat-label">Hard</div>
+        </div>
+      </div>
     </div>
-    <div class="checkbox-group">
-        <input type="checkbox" id="auto-sync">
-        <label for="auto-sync">Enable auto sync on problem submission</label>
-    </div>
-    <button class="btn btn-success" id="save-settings-btn">Save Settings</button>
-</div>
+  </div>
 
-<!-- Stats Section -->
-<div class="leetcode-stats">
-  <div class="stat-box total">
-    <div class="stat-number" id="total-synced">0</div>
-    <div class="stat-label">Total</div>
-  </div>
-  <div class="stat-box easy">
-    <div class="stat-number" id="easy-count">0</div>
-    <div class="stat-label">Easy</div>
-  </div>
-  <div class="stat-box medium">
-    <div class="stat-number" id="medium-count">0</div>
-    <div class="stat-label">Medium</div>
-  </div>
-  <div class="stat-box hard">
-    <div class="stat-number" id="hard-count">0</div>
-    <div class="stat-label">Hard</div>
-  </div>
-</div>
-
-</div>
-
-<div class="footer">
+  <div class="footer">
     &copy; 2025 GitSync. All rights reserved.
-</div>
+  </div>
 
-<script src="popup.js"></script>
+  <script>
+    document.querySelectorAll(".tab-button").forEach(button => {
+      button.addEventListener("click", () => {
+        const tab = button.getAttribute("data-tab");
 
+        document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
 
+        document.querySelectorAll(".tab-content").forEach(content => {
+          content.classList.remove("active");
+          if (content.getAttribute("data-tab") === tab) {
+            content.classList.add("active");
+          }
+        });
+      });
+    });
+
+    // Optional: Switch to stats tab after login
+    // function switchToStatsTab() {
+    //   document.querySelector('.tab-button[data-tab="stats"]').click();
+    // }
+  </script>
+
+  <script src="popup.js"></script>
 </body>
 </html>
