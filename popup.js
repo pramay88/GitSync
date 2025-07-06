@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// stats
+
 const totalSyncedEl = document.getElementById("total-synced");
 const easyCountEl = document.getElementById("easy-count");
 const mediumCountEl = document.getElementById("medium-count");
@@ -85,35 +87,31 @@ const hardCountEl = document.getElementById("hard-count");
 
 chrome.storage.local.get(["syncedSolutions"], (result) => {
   const history = result.syncedSolutions || [];
-
-  const counts = { easy: 0, medium: 0, hard: 0 };
-  const uniqueProblems = new Map(); // Map<problemNumber, difficulty>
+  const seen = new Set();
+  const counts = { Easy: 0, Medium: 0, Hard: 0 };
 
   history.forEach(item => {
-    const title = item.title?.trim();
-
-    const difficulty = item.difficulty?.toLowerCase(); // normalize to lowercase
-
-    if (!title || !difficulty) return;
-
-    const match = title.match(/^(\d+)\.\s+/); // extract "1" from "1. Two Sum"
-    if (!match) return;
-
-    const problemNumber = match[1];
-
-    // If not already added, count it
-    if (!uniqueProblems.has(problemNumber)) {
-      uniqueProblems.set(problemNumber, difficulty);
-      if (counts[difficulty] !== undefined) {
-        counts[difficulty]++;
-      }
+    const id = item.title?.split('.')[0]; // unique ID from title
+    if (!seen.has(id)) {
+      seen.add(id);
+      const diff = item.difficulty?.trim();
+      if (counts[diff] !== undefined) counts[diff]++;
     }
   });
 
-  totalSyncedEl.textContent = uniqueProblems.size;
-  easyCountEl.textContent = counts.easy;
-  mediumCountEl.textContent = counts.medium;
-  hardCountEl.textContent = counts.hard;
+  const total = seen.size;
+
+  // Animate ring fill (max ring is 100)
+  const fg = document.querySelector('.progress-ring .fg');
+  const circumference = 2 * Math.PI * 40;
+  const percent = Math.min((total / 100) * 100, 100);
+  const offset = circumference - (percent / 100) * circumference;
+  fg.style.strokeDashoffset = offset;
+
+  document.getElementById("synced-count").textContent = total;
+  document.getElementById("easy-count-box").textContent = counts.Easy;
+  document.getElementById("medium-count-box").textContent = counts.Medium;
+  document.getElementById("hard-count-box").textContent = counts.Hard;
 });
 
 document.querySelectorAll(".tab-button").forEach(button => {
@@ -133,3 +131,29 @@ document.querySelectorAll(".tab-button").forEach(button => {
     });
   });
 });
+
+// Handle auto-sync toggle
+function switchTab(tabName) {
+    document.querySelectorAll(".tab-button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+
+    document.querySelectorAll(".tab-content").forEach(content => {
+      content.classList.toggle("active", content.dataset.tab === tabName);
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    chrome.storage.local.get(["githubToken"], (result) => {
+      const token = result.githubToken;
+      const defaultTab = token && token.startsWith("ghp_") ? "stats" : "sync";
+      switchTab(defaultTab);
+    });
+
+    document.querySelectorAll(".tab-button").forEach(button => {
+      button.addEventListener("click", () => {
+        const tab = button.getAttribute("data-tab");
+        switchTab(tab);
+      });
+    });
+  });

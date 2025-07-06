@@ -246,6 +246,109 @@ body {
 .total .stat-number {
   color: #34495e;
 }
+.stats-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 12px;
+  gap: 16px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08); /* Soft shadow */
+  border: 1px solid #e1e4e8; /* Light border */
+}
+
+
+.progress-ring {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.progress-ring svg {
+  transform: rotate(-90deg);
+}
+
+.progress-ring circle {
+  fill: none;
+  stroke-width: 8;
+  r: 40;
+  cx: 50;
+  cy: 50;
+}
+
+.progress-ring .bg {
+  stroke: #e1e4e8;
+}
+
+.progress-ring .fg {
+  stroke: #0366d6;
+  stroke-linecap: round;
+  stroke-dasharray: 251.2;
+  stroke-dashoffset: 251.2;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.center-text #synced-count {
+  font-size: 20px;
+  font-weight: bold;
+  color: #0366d6;
+}
+
+.center-text .label {
+  font-size: 12px;
+  color: #6a737d;
+}
+
+.side-counts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.count-box {
+  background: #1e1e1e;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  min-width: 60px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.count-box .label {
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.count-box.easy {
+  background: #eafaf1; /* Light green */
+  color: #2ecc71;
+}
+
+.count-box.medium {
+  background: #fff5e6; /* Light orange */
+  color: #e67e22;
+}
+
+.count-box.hard {
+  background: #fdecea; /* Light red */
+  color: #e74c3c;
+}
+.count-box:hover {
+  filter: brightness(0.98);
+  cursor: pointer;
+}
+
+
 
   </style>
 </head>
@@ -265,7 +368,7 @@ body {
     </div>
 
     <!-- Tab Content: Sync -->
-    <div class="tab-content active" data-tab="sync">
+    <div class="tab-content " data-tab="sync">
       <div class="auth-section">
         <h3>GitHub Authentication</h3>
         <div id="auth-status" class="status-indicator disconnected">
@@ -306,53 +409,40 @@ body {
 
     <!-- Tab Content: Stats -->
     <div class="tab-content" data-tab="stats">
-      <div class="leetcode-stats">
-        <div class="stat-box total">
-          <div class="stat-number" id="total-synced">0</div>
-          <div class="stat-label">Total</div>
-        </div>
-        <div class="stat-box easy">
-          <div class="stat-number" id="easy-count">0</div>
-          <div class="stat-label">Easy</div>
-        </div>
-        <div class="stat-box medium">
-          <div class="stat-number" id="medium-count">0</div>
-          <div class="stat-label">Medium</div>
-        </div>
-        <div class="stat-box hard">
-          <div class="stat-number" id="hard-count">0</div>
-          <div class="stat-label">Hard</div>
-        </div>
+  <div class="stats-wrapper">
+    <div class="progress-ring">
+      <svg width="100" height="100">
+        <circle class="bg" cx="50" cy="50" r="40" />
+        <circle class="fg" cx="50" cy="50" r="40" />
+      </svg>
+      <div class="center-text">
+        <div id="synced-count">0</div>
+        <div class="label">Synced</div>
       </div>
     </div>
+
+    <div class="side-counts">
+      <div class="count-box easy">
+        <div class="label">Easy</div>
+        <div id="easy-count-box">0</div>
+      </div>
+      <div class="count-box medium">
+        <div class="label">Medium</div>
+        <div id="medium-count-box">0</div>
+      </div>
+      <div class="count-box hard">
+        <div class="label">Hard</div>
+        <div id="hard-count-box">0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
   </div>
 
   <div class="footer">
     &copy; 2025 GitSync. All rights reserved.
   </div>
-
-  <script>
-    document.querySelectorAll(".tab-button").forEach(button => {
-      button.addEventListener("click", () => {
-        const tab = button.getAttribute("data-tab");
-
-        document.querySelectorAll(".tab-button").forEach(btn => btn.classList.remove("active"));
-        button.classList.add("active");
-
-        document.querySelectorAll(".tab-content").forEach(content => {
-          content.classList.remove("active");
-          if (content.getAttribute("data-tab") === tab) {
-            content.classList.add("active");
-          }
-        });
-      });
-    });
-
-    // Optional: Switch to stats tab after login
-    // function switchToStatsTab() {
-    //   document.querySelector('.tab-button[data-tab="stats"]').click();
-    // }
-  </script>
 
   <script src="popup.js"></script>
 </body>
