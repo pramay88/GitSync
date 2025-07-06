@@ -1,3 +1,4 @@
+//popup.js
 document.addEventListener('DOMContentLoaded', () => {
     const connectBtn = document.getElementById('connect-btn');
     const tokenInput = document.getElementById('github-token');
@@ -75,4 +76,42 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         setTimeout(() => messageContainer.innerHTML = '', 4000);
     }
+});
+
+const totalSyncedEl = document.getElementById("total-synced");
+const easyCountEl = document.getElementById("easy-count");
+const mediumCountEl = document.getElementById("medium-count");
+const hardCountEl = document.getElementById("hard-count");
+
+chrome.storage.local.get(["syncedSolutions"], (result) => {
+  const history = result.syncedSolutions || [];
+
+  const counts = { easy: 0, medium: 0, hard: 0 };
+  const uniqueProblems = new Map(); // Map<problemNumber, difficulty>
+
+  history.forEach(item => {
+    const title = item.title?.trim();
+
+    const difficulty = item.difficulty?.toLowerCase(); // normalize to lowercase
+
+    if (!title || !difficulty) return;
+
+    const match = title.match(/^(\d+)\.\s+/); // extract "1" from "1. Two Sum"
+    if (!match) return;
+
+    const problemNumber = match[1];
+
+    // If not already added, count it
+    if (!uniqueProblems.has(problemNumber)) {
+      uniqueProblems.set(problemNumber, difficulty);
+      if (counts[difficulty] !== undefined) {
+        counts[difficulty]++;
+      }
+    }
+  });
+
+  totalSyncedEl.textContent = uniqueProblems.size;
+  easyCountEl.textContent = counts.easy;
+  mediumCountEl.textContent = counts.medium;
+  hardCountEl.textContent = counts.hard;
 });

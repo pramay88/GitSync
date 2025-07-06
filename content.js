@@ -693,6 +693,14 @@ extractCode() {
     }
 }
 
+updateStats(syncData) {
+    chrome.storage.local.get(["syncedSolutions"], (result) => {
+        const history = result.syncedSolutions || [];
+        history.push(syncData);
+        chrome.storage.local.set({ syncedSolutions: history });
+        this.log('Stats updated with new sync data:', syncData);
+    });
+}
 
     async handleButtonClick() {
         if (this.isProcessing) {
@@ -722,6 +730,18 @@ extractCode() {
             if (response.success) {
                 this.updateButtonState('success');
                 this.showSuccessMessage(response.url, response.fileName);
+                
+                // handle stats data
+                const syncData = {
+                    title: this.solutionData.problemTitle,  // 🟢 The actual title
+                    difficulty: this.solutionData.difficulty, // 🟢 Difficulty
+                    date: new Date().toISOString(),          // 🟢 ISO date for consistency
+                };
+
+
+                this.updateStats(syncData);
+
+
             } else {
                 throw new Error(response.error || 'Failed to push solution');
             }

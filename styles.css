@@ -338,3 +338,43 @@
         background-position: 0% 50%;
     }
 }
+
+#leetcode-toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.leetcode-toast {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    color: white;
+    animation: fadeInOut 4s ease forwards;
+    max-width: 320px;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.leetcode-toast.success {
+    background-color: #28a745;
+}
+
+.leetcode-toast.error {
+    background-color: #dc3545;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    10% { opacity: 1; transform: translateY(0); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+

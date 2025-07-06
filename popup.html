@@ -254,6 +254,78 @@
             font-size: 12px;
             color: #6a737d;
         }
+
+        /* Stats */
+.leetcode-stats {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 8px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  max-width: 300px;
+}
+
+.stat-box {
+  border-radius: 16px;
+  padding: 4px 12px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  font-weight: 500;
+  background: #fdfdfd;
+  border: 1px solid #eee;
+  transition: all 0.2s ease-in-out;
+}
+.stat-box:hover {
+  box-shadow: 0 0 6px rgba(0,0,0,0.05);
+}
+
+
+.stat-number {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #555;
+}
+
+/* Difficulty-based coloring */
+.easy .stat-number {
+  color: #2ecc71; /* Green */
+}
+
+.medium .stat-number {
+  color: #e67e22; /* Orange */
+}
+
+.hard .stat-number {
+  color: #e74c3c; /* Red */
+}
+
+.total .stat-number {
+  color: #34495e; /* Dark blue-gray */
+}
+.stat-box:hover::after {
+  content: "X solutions tagged";
+  position: absolute;
+  background: #333;
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
     </style>
 </head>
 <body>
@@ -312,23 +384,29 @@
 </div>
 
 <!-- Stats Section -->
-<div class="stats-section">
-    <h3>Sync Stats</h3>
-    <div class="stats-grid">
-        <div class="stat-item">
-            <div class="stat-number" id="total-synced">0</div>
-            <div class="stat-label">Solutions Synced</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-number" id="last-sync">--</div>
-            <div class="stat-label">Last Sync</div>
-        </div>
-    </div>
+<div class="leetcode-stats">
+  <div class="stat-box total">
+    <div class="stat-number" id="total-synced">0</div>
+    <div class="stat-label">Total</div>
+  </div>
+  <div class="stat-box easy">
+    <div class="stat-number" id="easy-count">0</div>
+    <div class="stat-label">Easy</div>
+  </div>
+  <div class="stat-box medium">
+    <div class="stat-number" id="medium-count">0</div>
+    <div class="stat-label">Medium</div>
+  </div>
+  <div class="stat-box hard">
+    <div class="stat-number" id="hard-count">0</div>
+    <div class="stat-label">Hard</div>
+  </div>
 </div>
+
 </div>
 
 <div class="footer">
-    &copy; 2025 LeetCode Git Pusher. All rights reserved.
+    &copy; 2025 GitSync. All rights reserved.
 </div>
 
 <script src="popup.js"></script>
